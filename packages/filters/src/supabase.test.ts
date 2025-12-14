@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildSupabaseFilters } from "./build-supabase";
-import { buildSupabaseWhere, type FilterBuilder } from "./where/build-supabase";
+import { buildSupabaseWhere, type SupabaseFilterBuilder } from "./where/build-supabase";
 import type { QueryFilters } from "./types";
 
 interface User {
@@ -13,11 +13,11 @@ interface User {
   createdAt: Date;
 }
 
-// Mock FilterBuilder factory
-function createMockQuery(): FilterBuilder<User> & { calls: { method: string; args: unknown[] }[] } {
+// Mock SupabaseFilterBuilder factory
+function createMockQuery(): SupabaseFilterBuilder<User> & { calls: { method: string; args: unknown[] }[] } {
   const calls: { method: string; args: unknown[] }[] = [];
 
-  const query: FilterBuilder<User> & { calls: { method: string; args: unknown[] }[] } = {
+  const query: SupabaseFilterBuilder<User> & { calls: { method: string; args: unknown[] }[] } = {
     calls,
     eq(column: string, value: unknown) {
       calls.push({ method: "eq", args: [column, value] });

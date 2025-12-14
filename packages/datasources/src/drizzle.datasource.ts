@@ -1,16 +1,18 @@
 import { getTableColumns, type Table } from "drizzle-orm";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { PostgresJsDatabase, PostgresJsTransaction } from "drizzle-orm/postgres-js";
 import type { QueryFilters } from "@ormx/filters";
 import { buildDrizzleWhere } from "@ormx/filters/where/drizzle";
 import type IDatasource from "./datasource.interface";
 
+type DrizzleDatabase = PostgresJsDatabase | PostgresJsTransaction<Record<string, never>, Record<string, never>>;
+
 export default class DrizzleDatasource<TEntity extends { id: string | number }, TTable extends Table>
-  implements IDatasource<TEntity>
+  implements IDatasource<TEntity, DrizzleDatabase>
 {
-  private readonly database: PostgresJsDatabase;
+  private readonly database: DrizzleDatabase;
   private readonly table: TTable;
 
-  constructor(database: PostgresJsDatabase, table: TTable) {
+  constructor(database: DrizzleDatabase, table: TTable) {
     this.database = database;
     this.table = table;
   }
@@ -18,6 +20,10 @@ export default class DrizzleDatasource<TEntity extends { id: string | number }, 
   private getColumn(field: string) {
     const columns = getTableColumns(this.table);
     return columns[field as keyof typeof columns];
+  }
+
+  withTransaction(tx: DrizzleDatabase): DrizzleDatasource<TEntity, TTable> {
+    return new DrizzleDatasource(tx, this.table);
   }
 
   async store(payload: Omit<TEntity, "id">): Promise<TEntity> {

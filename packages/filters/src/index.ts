@@ -6,7 +6,7 @@ export { buildDrizzleFilters, buildDrizzleOrder, buildDrizzleSelect, buildDrizzl
 export type { PrismaFieldOperators, PrismaFilters, PrismaOrderBy, PrismaSelect, PrismaWhere } from "./build-prisma";
 // Prisma
 export { buildPrismaFilters, buildPrismaOrder, buildPrismaSelect, buildPrismaWhere } from "./build-prisma";
-export type { FilterBuilder } from "./build-supabase";
+export type { SupabaseFilterBuilder } from "./build-supabase";
 // Supabase
 export { buildSupabaseFilters, buildSupabaseOrder, buildSupabaseSelect, buildSupabaseWhere } from "./build-supabase";
 export type { Operator, Order, OrderDirection, QueryFilters, Select, Where } from "./types";

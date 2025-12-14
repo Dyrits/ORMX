@@ -4,19 +4,19 @@ import type { Operator, Where } from "../types";
  * Supabase/PostgREST filter builder interface.
  * Compatible with the query builder returned by `supabase.from('table').select()`.
  */
-export type FilterBuilder<TEntity> = {
-  eq(column: string, value: unknown): FilterBuilder<TEntity>;
-  neq(column: string, value: unknown): FilterBuilder<TEntity>;
-  gt(column: string, value: unknown): FilterBuilder<TEntity>;
-  gte(column: string, value: unknown): FilterBuilder<TEntity>;
-  lt(column: string, value: unknown): FilterBuilder<TEntity>;
-  lte(column: string, value: unknown): FilterBuilder<TEntity>;
-  in(column: string, values: unknown[]): FilterBuilder<TEntity>;
-  ilike(column: string, pattern: string): FilterBuilder<TEntity>;
-  is(column: string, value: null): FilterBuilder<TEntity>;
-  not(column: string, operator: string, value: unknown): FilterBuilder<TEntity>;
-  or(filters: string): FilterBuilder<TEntity>;
-  filter(column: string, operator: string, value: unknown): FilterBuilder<TEntity>;
+export type SupabaseFilterBuilder<TEntity> = {
+  eq(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  neq(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  gt(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  gte(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  lt(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  lte(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  in(column: string, values: unknown[]): SupabaseFilterBuilder<TEntity>;
+  ilike(column: string, pattern: string): SupabaseFilterBuilder<TEntity>;
+  is(column: string, value: null): SupabaseFilterBuilder<TEntity>;
+  not(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+  or(filters: string): SupabaseFilterBuilder<TEntity>;
+  filter(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TEntity>;
 };
 
 const operators: Record<Operator, { method: string; transform?: (value: unknown) => unknown } | null> = {
@@ -103,7 +103,7 @@ function buildWhereStrings<TEntity>(where: Where<TEntity>): string[] {
 /**
  * Applies Where filters to a Supabase query builder.
  */
-export function buildSupabaseWhere<TEntity>(query: FilterBuilder<TEntity>, where?: Where<TEntity>): FilterBuilder<TEntity> {
+export function buildSupabaseWhere<TEntity>(query: SupabaseFilterBuilder<TEntity>, where?: Where<TEntity>): SupabaseFilterBuilder<TEntity> {
   if (!where) {
     return query;
   }
