@@ -1,11 +1,9 @@
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
-import type { Operator, QueryFilters, Where } from "./types";
+import type { GetColumn } from "../drizzle.types";
+import type { Operator, Where } from "../types";
 
-/**
- * Function to resolve a field name to a Drizzle column.
- */
-export type GetColumn = (field: string) => AnyColumn;
+export type { GetColumn } from "../drizzle.types";
 
 const TRUE = sql`true`;
 
@@ -25,14 +23,21 @@ const operators: Record<Operator, (column: AnyColumn, value?: unknown) => SQL> =
   StartsWith: (column, value) => ilike(column, `${String(value)}%`),
 };
 
-function buildWhere<TEntity>(where: Where<TEntity>, getColumn: GetColumn): SQL {
+/**
+ * Converts a generic Where clause into Drizzle-compatible SQL.
+ */
+export function buildDrizzleWhere<TEntity>(where: Where<TEntity> | undefined, getColumn: GetColumn): SQL {
+  if (!where) {
+    return TRUE;
+  }
+
   const output: SQL[] = [];
 
   for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
     if (key === "OneOf") {
       if (Array.isArray(value)) {
         const groups = value as Where<TEntity>[];
-        const $or = groups.map(($where) => buildWhere($where, getColumn));
+        const $or = groups.map(($where) => buildDrizzleWhere($where, getColumn));
         if ($or.length > 0) {
           output.push(or(...$or) as SQL);
         }
@@ -83,27 +88,4 @@ function buildWhere<TEntity>(where: Where<TEntity>, getColumn: GetColumn): SQL {
   }
 
   return and(...output) as SQL;
-}
-
-/**
- * Converts QueryFilters to Drizzle where clause.
- *
- * @example
- * ```ts
- * import { users } from './schema';
- *
- * const filters: QueryFilters<User> = {
- *   where: { name: { Contains: "john" } }
- * };
- *
- * const getColumn = (field: string) => users[field as keyof typeof users];
- * const { where } = toDrizzle(filters, getColumn);
- *
- * db.select().from(users).where(where);
- * ```
- */
-export function toDrizzle<TEntity>(filters: QueryFilters<TEntity>, getColumn: GetColumn): { where: SQL } {
-  return {
-    where: filters.where ? buildWhere(filters.where, getColumn) : TRUE,
-  };
 }

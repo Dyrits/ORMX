@@ -1,4 +1,4 @@
-import type { Operator, QueryFilters, Where } from "./types";
+import type { Operator, Where } from "../types";
 
 /**
  * Supabase/PostgREST filter builder interface.
@@ -100,10 +100,14 @@ function buildWhereStrings<TEntity>(where: Where<TEntity>): string[] {
   return output;
 }
 
-function buildWhere<TEntity>(
-  query: FilterBuilder<TEntity>,
-  where: Where<TEntity>,
-): FilterBuilder<TEntity> {
+/**
+ * Applies Where filters to a Supabase query builder.
+ */
+export function buildSupabaseWhere<TEntity>(query: FilterBuilder<TEntity>, where?: Where<TEntity>): FilterBuilder<TEntity> {
+  if (!where) {
+    return query;
+  }
+
   for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
     if (key === "OneOf") {
       if (Array.isArray(value)) {
@@ -172,27 +176,4 @@ function buildWhere<TEntity>(
   }
 
   return query;
-}
-
-/**
- * Applies QueryFilters to a Supabase query builder.
- *
- * @example
- * ```ts
- * const filters: QueryFilters<User> = {
- *   where: { name: { Contains: "john" }, age: { GTE: 18 } }
- * };
- * const query = supabase.from('users').select();
- * const filteredQuery = toSupabase(query, filters);
- * ```
- */
-export function toSupabase<TEntity>(
-  query: FilterBuilder<TEntity>,
-  filters: QueryFilters<TEntity>,
-): FilterBuilder<TEntity> {
-  if (!filters.where) {
-    return query;
-  }
-
-  return buildWhere(query, filters.where);
 }

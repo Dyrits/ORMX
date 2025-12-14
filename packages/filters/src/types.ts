@@ -1,20 +1,7 @@
 /**
  * Available filter operators for query conditions.
  */
-export type Operator =
-  | "Is"
-  | "IsNot"
-  | "GT"
-  | "GTE"
-  | "LT"
-  | "LTE"
-  | "In"
-  | "NotIn"
-  | "Contains"
-  | "StartsWith"
-  | "EndsWith"
-  | "IsNull"
-  | "IsNotNull";
+export type Operator = "Is" | "IsNot" | "GT" | "GTE" | "LT" | "LTE" | "In" | "NotIn" | "Contains" | "StartsWith" | "EndsWith" | "IsNull" | "IsNotNull";
 
 /**
  * Where clause for filtering entities.
@@ -53,9 +40,22 @@ export type Select<TEntity> = Partial<{
 }>;
 
 /**
- * Complete query filters including where and select clauses.
+ * Order direction for sorting.
+ */
+export type OrderDirection = "asc" | "desc";
+
+/**
+ * Order clause for sorting entities.
+ */
+export type Order<TEntity> = Partial<{
+  [Key in keyof TEntity]?: OrderDirection;
+}>;
+
+/**
+ * Complete query filters including where, select, and order clauses.
  */
 export type QueryFilters<TEntity> = {
   where?: Where<TEntity>;
   select?: Select<TEntity>;
+  order?: Order<TEntity>;
 };

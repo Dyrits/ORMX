@@ -1,4 +1,4 @@
-import type { Operator, QueryFilters, Where } from "./types";
+import type { Operator, Where } from "../types";
 
 const operators: Record<Operator, keyof PrismaFieldOperators<unknown> | null> = {
   Contains: "contains",
@@ -45,7 +45,7 @@ export type PrismaWhere<TEntity> = { [Key in keyof TEntity]?: PrismaFieldOperato
 /**
  * Converts a generic Where clause into Prisma-compatible format.
  */
-export function buildWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<TEntity> {
+export function buildPrismaWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<TEntity> {
   const output = {} as PrismaWhere<TEntity>;
 
   if (!where) {
@@ -56,7 +56,7 @@ export function buildWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<TEntity
     if (key === "OneOf") {
       if (Array.isArray(value)) {
         const groups = value as Where<TEntity>[];
-        const or = groups.map(($where) => buildWhere($where));
+        const or = groups.map(($where) => buildPrismaWhere($where));
 
         if (or.length > 0) {
           output.OR = or;
@@ -100,23 +100,4 @@ export function buildWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<TEntity
   }
 
   return output;
-}
-
-/**
- * Converts QueryFilters to Prisma query format.
- *
- * @example
- * ```ts
- * const filters: QueryFilters<User> = {
- *   where: { name: { Contains: "john" } }
- * };
- * const prismaQuery = toPrisma(filters);
- * // { where: { name: { contains: "john" } } }
- * ```
- */
-export function toPrisma<TEntity>(filters: QueryFilters<TEntity>): { where?: PrismaWhere<TEntity>; select?: {} } {
-  return {
-    select: {},
-    where: buildWhere(filters.where),
-  };
 }
