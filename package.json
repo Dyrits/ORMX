@@ -29,6 +29,8 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -45,10 +47,12 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "drizzle-orm": "^0.45.1",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.15"
   },
   "peerDependencies": {
-    "drizzle-orm": ">=0.30.0"
+    "drizzle-orm": ""
   },
   "peerDependenciesMeta": {
     "drizzle-orm": {
