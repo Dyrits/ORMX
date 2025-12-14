@@ -1,2 +1,2 @@
-// @ormx/datasources - Placeholder for future datasource utilities
-export {};
+export type { default as IDatasource } from "./datasource.interface";
+export { default as DrizzleDatasource } from "./drizzle.datasource";

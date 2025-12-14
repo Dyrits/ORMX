@@ -2,7 +2,19 @@
   "author": "",
   "description": "Datasource utilities for ORMX",
   "devDependencies": {
+    "drizzle-orm": "^0.45.1",
     "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "drizzle-orm": ""
+  },
+  "peerDependenciesMeta": {
+    "drizzle-orm": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@ormx/filters": "^0.1.1"
   },
   "exports": {
     ".": {
