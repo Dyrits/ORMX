@@ -1,6 +1,6 @@
 {
   "name": "or-query",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ORQ (Object Relational Query) - Unified query filtering across Prisma, Drizzle, and Supabase",
   "type": "module",
   "main": "./dist/index.js",
