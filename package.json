@@ -1,0 +1,58 @@
+{
+  "name": "or-query",
+  "version": "0.1.1",
+  "description": "ORQ (Object Relational Query) - Unified query filtering across Prisma, Drizzle, and Supabase",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./prisma": {
+      "import": "./dist/prisma.js",
+      "types": "./dist/prisma.d.ts"
+    },
+    "./supabase": {
+      "import": "./dist/supabase.js",
+      "types": "./dist/supabase.d.ts"
+    },
+    "./drizzle": {
+      "import": "./dist/drizzle.js",
+      "types": "./dist/drizzle.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "orq",
+    "object-relational-query",
+    "query",
+    "filter",
+    "prisma",
+    "drizzle",
+    "supabase",
+    "orm",
+    "database"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "drizzle-orm": ">=0.30.0"
+  },
+  "peerDependenciesMeta": {
+    "drizzle-orm": {
+      "optional": true
+    }
+  }
+}
