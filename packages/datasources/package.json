@@ -1,20 +1,13 @@
 {
   "author": "",
-  "description": "Datasource utilities for ORMX",
-  "devDependencies": {
-    "drizzle-orm": "^0.45.1",
-    "typescript": "^5.7.0"
-  },
-  "peerDependencies": {
-    "drizzle-orm": ""
-  },
-  "peerDependenciesMeta": {
-    "drizzle-orm": {
-      "optional": true
-    }
-  },
   "dependencies": {
     "@ormx/filters": "^0.1.1"
+  },
+  "description": "Datasource utilities for ORMX",
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "drizzle-orm": "^0.45.1",
+    "typescript": "^5.7.0"
   },
   "exports": {
     ".": {
@@ -23,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "keywords": [
     "ormx",
@@ -35,6 +29,18 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "name": "@ormx/datasources",
+  "peerDependencies": {
+    "@supabase/supabase-js": "",
+    "drizzle-orm": ""
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    },
+    "drizzle-orm": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public"
   },

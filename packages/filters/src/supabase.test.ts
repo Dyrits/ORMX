@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildSupabaseFilters } from "./build-supabase";
-import { buildSupabaseWhere, type SupabaseFilterBuilder } from "./where/build-supabase";
 import type { QueryFilters } from "./types";
+import { buildSupabaseWhere, type SupabaseFilterBuilder } from "./where/build-supabase";
 
 interface User {
   id: number;
@@ -20,51 +20,51 @@ function createMockQuery(): SupabaseFilterBuilder<User> & { calls: { method: str
   const query: SupabaseFilterBuilder<User> & { calls: { method: string; args: unknown[] }[] } = {
     calls,
     eq(column: string, value: unknown) {
-      calls.push({ method: "eq", args: [column, value] });
-      return query;
-    },
-    neq(column: string, value: unknown) {
-      calls.push({ method: "neq", args: [column, value] });
-      return query;
-    },
-    gt(column: string, value: unknown) {
-      calls.push({ method: "gt", args: [column, value] });
-      return query;
-    },
-    gte(column: string, value: unknown) {
-      calls.push({ method: "gte", args: [column, value] });
-      return query;
-    },
-    lt(column: string, value: unknown) {
-      calls.push({ method: "lt", args: [column, value] });
-      return query;
-    },
-    lte(column: string, value: unknown) {
-      calls.push({ method: "lte", args: [column, value] });
-      return query;
-    },
-    in(column: string, values: unknown[]) {
-      calls.push({ method: "in", args: [column, values] });
-      return query;
-    },
-    ilike(column: string, pattern: string) {
-      calls.push({ method: "ilike", args: [column, pattern] });
-      return query;
-    },
-    is(column: string, value: null) {
-      calls.push({ method: "is", args: [column, value] });
-      return query;
-    },
-    not(column: string, operator: string, value: unknown) {
-      calls.push({ method: "not", args: [column, operator, value] });
-      return query;
-    },
-    or(filters: string) {
-      calls.push({ method: "or", args: [filters] });
+      calls.push({ args: [column, value], method: "eq" });
       return query;
     },
     filter(column: string, operator: string, value: unknown) {
-      calls.push({ method: "filter", args: [column, operator, value] });
+      calls.push({ args: [column, operator, value], method: "filter" });
+      return query;
+    },
+    gt(column: string, value: unknown) {
+      calls.push({ args: [column, value], method: "gt" });
+      return query;
+    },
+    gte(column: string, value: unknown) {
+      calls.push({ args: [column, value], method: "gte" });
+      return query;
+    },
+    ilike(column: string, pattern: string) {
+      calls.push({ args: [column, pattern], method: "ilike" });
+      return query;
+    },
+    in(column: string, values: unknown[]) {
+      calls.push({ args: [column, values], method: "in" });
+      return query;
+    },
+    is(column: string, value: null) {
+      calls.push({ args: [column, value], method: "is" });
+      return query;
+    },
+    lt(column: string, value: unknown) {
+      calls.push({ args: [column, value], method: "lt" });
+      return query;
+    },
+    lte(column: string, value: unknown) {
+      calls.push({ args: [column, value], method: "lte" });
+      return query;
+    },
+    neq(column: string, value: unknown) {
+      calls.push({ args: [column, value], method: "neq" });
+      return query;
+    },
+    not(column: string, operator: string, value: unknown) {
+      calls.push({ args: [column, operator, value], method: "not" });
+      return query;
+    },
+    or(filters: string) {
+      calls.push({ args: [filters], method: "or" });
       return query;
     },
   };
@@ -93,13 +93,13 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with eq", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { name: { Is: "john" } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["name", "eq", "john"] });
+      expect(query.calls).toContainEqual({ args: ["name", "eq", "john"], method: "filter" });
     });
 
     it("should handle numeric Is condition", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { Is: 25 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "eq", 25] });
+      expect(query.calls).toContainEqual({ args: ["age", "eq", 25], method: "filter" });
     });
   });
 
@@ -107,7 +107,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with neq", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { status: { IsNot: "inactive" } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "neq", "inactive"] });
+      expect(query.calls).toContainEqual({ args: ["status", "neq", "inactive"], method: "filter" });
     });
   });
 
@@ -115,7 +115,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with gt", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { GT: 18 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gt", 18] });
+      expect(query.calls).toContainEqual({ args: ["age", "gt", 18], method: "filter" });
     });
   });
 
@@ -123,7 +123,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with gte", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { GTE: 21 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gte", 21] });
+      expect(query.calls).toContainEqual({ args: ["age", "gte", 21], method: "filter" });
     });
   });
 
@@ -131,7 +131,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with lt", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { LT: 65 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "lt", 65] });
+      expect(query.calls).toContainEqual({ args: ["age", "lt", 65], method: "filter" });
     });
   });
 
@@ -139,7 +139,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with lte", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { LTE: 100 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "lte", 100] });
+      expect(query.calls).toContainEqual({ args: ["age", "lte", 100], method: "filter" });
     });
   });
 
@@ -147,13 +147,13 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with in", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { status: { In: ["active", "pending"] } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "in", ["active", "pending"]] });
+      expect(query.calls).toContainEqual({ args: ["status", "in", ["active", "pending"]], method: "filter" });
     });
 
     it("should handle numeric array", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { id: { In: [1, 2, 3] } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["id", "in", [1, 2, 3]] });
+      expect(query.calls).toContainEqual({ args: ["id", "in", [1, 2, 3]], method: "filter" });
     });
   });
 
@@ -161,7 +161,7 @@ describe("buildSupabaseWhere", () => {
     it("should call not with in operator", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { status: { NotIn: ["banned", "deleted"] } });
-      expect(query.calls).toContainEqual({ method: "not", args: ["status", "in", "(banned,deleted)"] });
+      expect(query.calls).toContainEqual({ args: ["status", "in", "(banned,deleted)"], method: "not" });
     });
   });
 
@@ -169,7 +169,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with ilike and wildcards", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { name: { Contains: "john" } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["name", "ilike", "%john%"] });
+      expect(query.calls).toContainEqual({ args: ["name", "ilike", "%john%"], method: "filter" });
     });
   });
 
@@ -177,7 +177,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with ilike and trailing wildcard", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { email: { StartsWith: "admin" } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["email", "ilike", "admin%"] });
+      expect(query.calls).toContainEqual({ args: ["email", "ilike", "admin%"], method: "filter" });
     });
   });
 
@@ -185,7 +185,7 @@ describe("buildSupabaseWhere", () => {
     it("should call filter with ilike and leading wildcard", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { email: { EndsWith: "@example.com" } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["email", "ilike", "%@example.com"] });
+      expect(query.calls).toContainEqual({ args: ["email", "ilike", "%@example.com"], method: "filter" });
     });
   });
 
@@ -193,7 +193,7 @@ describe("buildSupabaseWhere", () => {
     it("should call is with null", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { email: { IsNull: null } });
-      expect(query.calls).toContainEqual({ method: "is", args: ["email", null] });
+      expect(query.calls).toContainEqual({ args: ["email", null], method: "is" });
     });
   });
 
@@ -201,7 +201,7 @@ describe("buildSupabaseWhere", () => {
     it("should call not with is null", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { email: { IsNotNull: null } });
-      expect(query.calls).toContainEqual({ method: "not", args: ["email", "is", null] });
+      expect(query.calls).toContainEqual({ args: ["email", "is", null], method: "not" });
     });
   });
 
@@ -209,8 +209,8 @@ describe("buildSupabaseWhere", () => {
     it("should call filter for each operator", () => {
       const query = createMockQuery();
       buildSupabaseWhere<User>(query, { age: { GTE: 18, LTE: 65 } });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gte", 18] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "lte", 65] });
+      expect(query.calls).toContainEqual({ args: ["age", "gte", 18], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["age", "lte", 65], method: "filter" });
     });
   });
 
@@ -221,8 +221,8 @@ describe("buildSupabaseWhere", () => {
         name: { Contains: "john" },
         status: { Is: "active" },
       });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["name", "ilike", "%john%"] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "eq", "active"] });
+      expect(query.calls).toContainEqual({ args: ["name", "ilike", "%john%"], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["status", "eq", "active"], method: "filter" });
     });
   });
 
@@ -232,7 +232,7 @@ describe("buildSupabaseWhere", () => {
       buildSupabaseWhere<User>(query, {
         OneOf: [{ status: { Is: "active" } }, { role: { Is: "admin" } }],
       });
-      expect(query.calls).toContainEqual({ method: "or", args: ["status.eq.active,role.eq.admin"] });
+      expect(query.calls).toContainEqual({ args: ["status.eq.active,role.eq.admin"], method: "or" });
     });
 
     it("should handle nested conditions within OneOf groups", () => {
@@ -242,8 +242,8 @@ describe("buildSupabaseWhere", () => {
       });
       // First group has multiple conditions, wrapped in and()
       expect(query.calls).toContainEqual({
-        method: "or",
         args: ["and(name.ilike.%admin%,status.eq.active),role.eq.superadmin"],
+        method: "or",
       });
     });
 
@@ -259,8 +259,8 @@ describe("buildSupabaseWhere", () => {
         name: { Contains: "john" },
         OneOf: [{ status: { Is: "active" } }, { role: { Is: "admin" } }],
       });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["name", "ilike", "%john%"] });
-      expect(query.calls).toContainEqual({ method: "or", args: ["status.eq.active,role.eq.admin"] });
+      expect(query.calls).toContainEqual({ args: ["name", "ilike", "%john%"], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["status.eq.active,role.eq.admin"], method: "or" });
     });
   });
 
@@ -281,11 +281,11 @@ describe("buildSupabaseWhere", () => {
         name: { Contains: "smith" },
         status: { In: ["active", "pending"] },
       });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gte", 18] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "lte", 65] });
-      expect(query.calls).toContainEqual({ method: "not", args: ["email", "is", null] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["name", "ilike", "%smith%"] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "in", ["active", "pending"]] });
+      expect(query.calls).toContainEqual({ args: ["age", "gte", 18], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["age", "lte", 65], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["email", "is", null], method: "not" });
+      expect(query.calls).toContainEqual({ args: ["name", "ilike", "%smith%"], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["status", "in", ["active", "pending"]], method: "filter" });
     });
 
     it("should handle admin OR premium user query", () => {
@@ -294,8 +294,8 @@ describe("buildSupabaseWhere", () => {
         OneOf: [{ role: { Is: "admin" } }, { role: { Is: "premium" } }],
         status: { Is: "active" },
       });
-      expect(query.calls).toContainEqual({ method: "or", args: ["role.eq.admin,role.eq.premium"] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "eq", "active"] });
+      expect(query.calls).toContainEqual({ args: ["role.eq.admin,role.eq.premium"], method: "or" });
+      expect(query.calls).toContainEqual({ args: ["status", "eq", "active"], method: "filter" });
     });
 
     it("should handle email domain search", () => {
@@ -304,8 +304,8 @@ describe("buildSupabaseWhere", () => {
         email: { EndsWith: "@company.com" },
         status: { IsNot: "banned" },
       });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["email", "ilike", "%@company.com"] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["status", "neq", "banned"] });
+      expect(query.calls).toContainEqual({ args: ["email", "ilike", "%@company.com"], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["status", "neq", "banned"], method: "filter" });
     });
 
     it("should handle age range with exclusions", () => {
@@ -314,9 +314,9 @@ describe("buildSupabaseWhere", () => {
         age: { GTE: 13, LT: 100 },
         status: { NotIn: ["banned", "deleted", "suspended"] },
       });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gte", 13] });
-      expect(query.calls).toContainEqual({ method: "filter", args: ["age", "lt", 100] });
-      expect(query.calls).toContainEqual({ method: "not", args: ["status", "in", "(banned,deleted,suspended)"] });
+      expect(query.calls).toContainEqual({ args: ["age", "gte", 13], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["age", "lt", 100], method: "filter" });
+      expect(query.calls).toContainEqual({ args: ["status", "in", "(banned,deleted,suspended)"], method: "not" });
     });
   });
 });
@@ -328,7 +328,7 @@ describe("buildSupabaseFilters", () => {
       where: { name: { Is: "test" } },
     };
     buildSupabaseFilters(query, filters);
-    expect(query.calls).toContainEqual({ method: "filter", args: ["name", "eq", "test"] });
+    expect(query.calls).toContainEqual({ args: ["name", "eq", "test"], method: "filter" });
   });
 
   it("should handle empty filters", () => {
@@ -343,13 +343,13 @@ describe("buildSupabaseFilters", () => {
     const filters: QueryFilters<User> = {
       where: {
         age: { GTE: 18 },
-        status: { Is: "active" },
         OneOf: [{ role: { Is: "admin" } }, { role: { Is: "moderator" } }],
+        status: { Is: "active" },
       },
     };
     buildSupabaseFilters(query, filters);
-    expect(query.calls).toContainEqual({ method: "filter", args: ["age", "gte", 18] });
-    expect(query.calls).toContainEqual({ method: "filter", args: ["status", "eq", "active"] });
-    expect(query.calls).toContainEqual({ method: "or", args: ["role.eq.admin,role.eq.moderator"] });
+    expect(query.calls).toContainEqual({ args: ["age", "gte", 18], method: "filter" });
+    expect(query.calls).toContainEqual({ args: ["status", "eq", "active"], method: "filter" });
+    expect(query.calls).toContainEqual({ args: ["role.eq.admin,role.eq.moderator"], method: "or" });
   });
 });

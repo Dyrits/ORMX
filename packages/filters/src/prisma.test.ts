@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPrismaFilters } from "./build-prisma";
-import { buildPrismaWhere } from "./where/build-prisma";
 import type { QueryFilters } from "./types";
+import { buildPrismaWhere } from "./where/build-prisma";
 
 interface User {
   id: number;
@@ -207,10 +207,7 @@ describe("buildPrismaWhere", () => {
         OneOf: [{ name: { Contains: "admin" }, status: { Is: "active" } }, { role: { Is: "superadmin" } }],
       });
       expect(result).toEqual({
-        OR: [
-          { name: { contains: "admin" }, status: { equals: "active" } },
-          { role: { equals: "superadmin" } },
-        ],
+        OR: [{ name: { contains: "admin" }, status: { equals: "active" } }, { role: { equals: "superadmin" } }],
       });
     });
   });
@@ -295,16 +292,16 @@ describe("buildPrismaFilters", () => {
     const filters: QueryFilters<User> = {
       where: {
         age: { GTE: 18 },
-        status: { Is: "active" },
         OneOf: [{ role: { Is: "admin" } }, { role: { Is: "moderator" } }],
+        status: { Is: "active" },
       },
     };
     const result = buildPrismaFilters(filters);
 
     expect(result.where).toEqual({
       age: { gte: 18 },
-      status: { equals: "active" },
       OR: [{ role: { equals: "admin" } }, { role: { equals: "moderator" } }],
+      status: { equals: "active" },
     });
   });
 });

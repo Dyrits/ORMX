@@ -2,41 +2,37 @@ import type { QueryFilters } from "@ormx/filters";
 import { buildSupabaseWhere, type SupabaseFilterBuilder } from "@ormx/filters/where/supabase";
 import type IDatasource from "./datasource.interface";
 
-type SupabaseClient = {
+/**
+ * Minimal Supabase client interface for datasource operations.
+ * Compatible with `@supabase/supabase-js` SupabaseClient.
+ */
+export interface SupabaseClientLike {
   from(table: string): SupabaseFilterBuilder<Record<string, unknown>> & {
-    insert(data: unknown): { select(): { single(): Promise<{ data: unknown; error: unknown }> } };
+    insert(data: unknown): { select(): { single(): PromiseLike<{ data: unknown; error: unknown }> } };
     update(data: unknown): SupabaseFilterBuilder<Record<string, unknown>> & {
-      select(): { single(): Promise<{ data: unknown; error: unknown }> };
+      select(): { single(): PromiseLike<{ data: unknown; error: unknown }> };
     };
-    delete(): SupabaseFilterBuilder<Record<string, unknown>>;
+    delete(): SupabaseFilterBuilder<Record<string, unknown>> & PromiseLike<{ error: unknown }>;
     select(): SupabaseFilterBuilder<Record<string, unknown>> & {
-      limit(count: number): { single(): Promise<{ data: unknown; error: unknown }> };
-      then(resolve: (value: { data: unknown[]; error: unknown }) => void): void;
-    };
+      limit(count: number): { single(): PromiseLike<{ data: unknown; error: unknown }> };
+    } & PromiseLike<{ data: unknown[]; error: unknown }>;
   };
-};
+}
 
 export default class SupabaseDatasource<TEntity extends { id: string | number }>
-  implements IDatasource<TEntity, SupabaseClient>
+  implements IDatasource<TEntity, SupabaseClientLike>
 {
-  private readonly client: SupabaseClient;
-  private readonly tableName: string;
+  constructor(private readonly client: SupabaseClientLike, private readonly table: string) {}
 
-  constructor(client: SupabaseClient, tableName: string) {
-    this.client = client;
-    this.tableName = tableName;
-  }
-
-  withTransaction(_tx: SupabaseClient): never {
+  withTransaction(_$transaction: SupabaseClientLike): never {
     throw new Error(
-      "SupabaseDatasource does not support transactions. " +
-        "Use DrizzleDatasource with your Supabase Postgres connection URL instead."
+      "SupabaseDatasource does not support transactions.Use DrizzleDatasource with your Supabase Postgres connection URL instead."
     );
   }
 
   async store(payload: Omit<TEntity, "id">): Promise<TEntity> {
     const { data, error } = await this.client
-      .from(this.tableName)
+      .from(this.table)
       .insert(payload)
       .select()
       .single();
@@ -49,10 +45,10 @@ export default class SupabaseDatasource<TEntity extends { id: string | number }>
   }
 
   async lookup(filters: QueryFilters<TEntity>): Promise<TEntity> {
-    let query = this.client.from(this.tableName).select();
-    query = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where) as typeof query;
+    const query = this.client.from(this.table).select();
+    const filtered = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where);
 
-    const { data, error } = await query.limit(1).single();
+    const { data, error } = await (filtered as typeof query).limit(1).single();
 
     if (error) {
       throw error;
@@ -62,25 +58,23 @@ export default class SupabaseDatasource<TEntity extends { id: string | number }>
   }
 
   async list(filters: QueryFilters<TEntity>): Promise<TEntity[]> {
-    let query = this.client.from(this.tableName).select();
-    query = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where) as typeof query;
+    const query = this.client.from(this.table).select();
+    const filtered = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where);
 
-    const result = await new Promise<{ data: unknown[]; error: unknown }>((resolve) => {
-      query.then(resolve);
-    });
+    const { data, error } = await (filtered as typeof query);
 
-    if (result.error) {
-      throw result.error;
+    if (error) {
+      throw error;
     }
 
-    return result.data as TEntity[];
+    return (data ?? []) as TEntity[];
   }
 
   async modify(filters: QueryFilters<TEntity>, payload: Partial<TEntity>): Promise<TEntity> {
-    let query = this.client.from(this.tableName).update(payload);
-    query = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where) as typeof query;
+    const query = this.client.from(this.table).update(payload);
+    const filtered = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where);
 
-    const { data, error } = await query.select().single();
+    const { data, error } = await (filtered as typeof query).select().single();
 
     if (error) {
       throw error;
@@ -90,15 +84,13 @@ export default class SupabaseDatasource<TEntity extends { id: string | number }>
   }
 
   async destroy(filters: QueryFilters<TEntity>): Promise<void> {
-    let query = this.client.from(this.tableName).delete();
-    query = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where) as typeof query;
+    const query = this.client.from(this.table).delete();
+    const filtered = buildSupabaseWhere(query as SupabaseFilterBuilder<TEntity>, filters.where);
 
-    const result = await new Promise<{ error: unknown }>((resolve) => {
-      (query as unknown as { then(resolve: (value: { error: unknown }) => void): void }).then(resolve);
-    });
+    const { error } = await (filtered as typeof query);
 
-    if (result.error) {
-      throw result.error;
+    if (error) {
+      throw error;
     }
   }
 }
