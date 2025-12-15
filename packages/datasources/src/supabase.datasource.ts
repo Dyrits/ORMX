@@ -19,23 +19,18 @@ export interface SupabaseClientLike {
   };
 }
 
-export default class SupabaseDatasource<TEntity extends { id: string | number }>
-  implements IDatasource<TEntity, SupabaseClientLike>
-{
-  constructor(private readonly client: SupabaseClientLike, private readonly table: string) {}
+export default class SupabaseDatasource<TEntity extends { id: string | number }> implements IDatasource<TEntity, SupabaseClientLike> {
+  constructor(
+    private readonly client: SupabaseClientLike,
+    private readonly table: string,
+  ) {}
 
   withTransaction(_$transaction: SupabaseClientLike): never {
-    throw new Error(
-      "SupabaseDatasource does not support transactions.Use DrizzleDatasource with your Supabase Postgres connection URL instead."
-    );
+    throw new Error("SupabaseDatasource does not support transactions.Use DrizzleDatasource with your Supabase Postgres connection URL instead.");
   }
 
   async store(payload: Omit<TEntity, "id">): Promise<TEntity> {
-    const { data, error } = await this.client
-      .from(this.table)
-      .insert(payload)
-      .select()
-      .single();
+    const { data, error } = await this.client.from(this.table).insert(payload).select().single();
 
     if (error) {
       throw error;

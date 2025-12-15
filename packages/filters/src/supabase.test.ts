@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { buildSupabaseFilters } from "./build-supabase";
 import type { QueryFilters } from "./types";
 import { buildSupabaseWhere, type SupabaseFilterBuilder } from "./where/build-supabase";

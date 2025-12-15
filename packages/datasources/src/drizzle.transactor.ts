@@ -1,8 +1,9 @@
+import type { ExtractTablesWithRelations } from "drizzle-orm";
+import type { PgQueryResultHKT, PgTransaction } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type ITransactor from "./transactor.interface";
 
-type TransactionCallback<TResult> = Parameters<PostgresJsDatabase["transaction"]>[0];
-type DrizzleTransaction = Parameters<TransactionCallback<unknown>>[0];
+export type DrizzleTransaction = PgTransaction<PgQueryResultHKT, Record<string, never>, ExtractTablesWithRelations<Record<string, never>>>;
 
 export default class DrizzleTransactor implements ITransactor<DrizzleTransaction> {
   constructor(private readonly database: PostgresJsDatabase) {}

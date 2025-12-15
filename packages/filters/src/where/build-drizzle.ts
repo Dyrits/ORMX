@@ -26,7 +26,7 @@ const operators: Record<Operator, (column: AnyColumn, value?: unknown) => SQL> =
 /**
  * Converts a generic Where clause into Drizzle-compatible SQL.
  */
-export function buildDrizzleWhere<TEntity>(where: Where<TEntity> | undefined, getColumn: GetColumn): SQL {
+export function buildDrizzleWhere<TEntity>(where: Where<TEntity>, getColumn: GetColumn): SQL {
   if (!where) {
     return TRUE;
   }
