@@ -1,10 +1,10 @@
 import type { QueryFilters } from "@ormx/filters";
 
-export default interface IDatasource<TEntity extends { id: string | number }, TTransaction> {
-  store(payload: Omit<TEntity, "id">): Promise<TEntity>;
-  lookup(filters: QueryFilters<TEntity>): Promise<TEntity>;
-  list(filters: QueryFilters<TEntity>): Promise<TEntity[]>;
-  modify(filters: QueryFilters<TEntity>, payload: Partial<TEntity>): Promise<TEntity>;
-  destroy(filters: QueryFilters<TEntity>): Promise<void>;
-  withTransaction(transaction: TTransaction): IDatasource<TEntity, TTransaction>;
+export default interface IDatasource<TSelect, TInsert extends Record<string, unknown>, TTransaction> {
+  store(payload: TInsert): Promise<TSelect>;
+  lookup(filters: QueryFilters<TSelect>): Promise<TSelect>;
+  list(filters: QueryFilters<TSelect>): Promise<TSelect[]>;
+  modify(filters: QueryFilters<TSelect>, payload: Partial<TInsert>): Promise<TSelect>;
+  destroy(filters: QueryFilters<TSelect>): Promise<void>;
+  withTransaction(transaction: TTransaction): IDatasource<TSelect, TInsert, TTransaction>;
 }

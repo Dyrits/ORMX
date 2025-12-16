@@ -22,7 +22,7 @@ export { buildSupabaseWhere } from "./where/build-supabase";
  * const filteredQuery = buildSupabaseFilters(query, filters);
  * ```
  */
-export function buildSupabaseFilters<TEntity>(query: SupabaseFilterBuilder<TEntity>, filters: QueryFilters<TEntity>): SupabaseFilterBuilder<TEntity> {
+export function buildSupabaseFilters<TSelect>(query: SupabaseFilterBuilder<TSelect>, filters: QueryFilters<TSelect>): SupabaseFilterBuilder<TSelect> {
   let result = query;
   result = buildSupabaseWhere(result, filters.where);
   result = buildSupabaseSelect(result, filters.select);

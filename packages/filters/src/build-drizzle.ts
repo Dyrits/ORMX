@@ -34,10 +34,10 @@ export type DrizzleFilters = {
  * db.select().from(users).where(where);
  * ```
  */
-export function buildDrizzleFilters<TEntity>(filters: QueryFilters<TEntity>, getColumn: GetColumn): DrizzleFilters {
+export function buildDrizzleFilters<TSelect>(filters: QueryFilters<TSelect>, getColumn: GetColumn): DrizzleFilters {
   return {
-    orderBy: buildDrizzleOrder(filters.order, getColumn),
-    select: buildDrizzleSelect(filters.select, getColumn),
-    where: buildDrizzleWhere(filters.where, getColumn),
+    orderBy: buildDrizzleOrder(filters.order || {}, getColumn),
+    select: buildDrizzleSelect(filters.select || {}, getColumn),
+    where: buildDrizzleWhere(filters.where || {}, getColumn),
   };
 }

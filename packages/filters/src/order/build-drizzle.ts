@@ -11,6 +11,6 @@ const TRUE = sql`true`;
  * Converts a generic Order clause into Drizzle-compatible format.
  * @todo Not yet implemented
  */
-export function buildDrizzleOrder<TEntity>(_order: Order<TEntity> | undefined, _getColumn: GetColumn): SQL {
+export function buildDrizzleOrder<TSelect>(_order: Order<TSelect> | undefined, _getColumn: GetColumn): SQL {
   return TRUE;
 }

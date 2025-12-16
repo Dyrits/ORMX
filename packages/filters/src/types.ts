@@ -20,22 +20,22 @@ export type Operator = "Is" | "IsNot" | "GT" | "GTE" | "LT" | "LTE" | "In" | "No
  * };
  * ```
  */
-export type Where<TEntity> = Partial<{
-  [Key in keyof TEntity]?: Partial<Record<Operator, TEntity[Key] | TEntity[Key][] | null>>;
-}> & { OneOf?: Where<TEntity>[] };
+export type Where<TSelect> = Partial<{
+  [Key in keyof TSelect]?: Partial<Record<Operator, TSelect[Key] | TSelect[Key][] | null>>;
+}> & { OneOf?: Where<TSelect>[] };
 
 /**
  * Select clause for choosing which fields to include.
  */
-export type Select<TEntity> = Partial<{
-  [Key in keyof TEntity]?: {
+export type Select<TSelect> = Partial<{
+  [Key in keyof TSelect]?: {
     include: boolean;
     fields?: {
-      with?: Array<keyof TEntity[Key]>;
-      without?: Array<keyof TEntity[Key]>;
+      with?: Array<keyof TSelect[Key]>;
+      without?: Array<keyof TSelect[Key]>;
     };
-    select?: Select<TEntity[Key]>;
-    where?: Where<TEntity[Key]>;
+    select?: Select<TSelect[Key]>;
+    where?: Where<TSelect[Key]>;
   };
 }>;
 
@@ -47,15 +47,15 @@ export type OrderDirection = "asc" | "desc";
 /**
  * Order clause for sorting entities.
  */
-export type Order<TEntity> = Partial<{
-  [Key in keyof TEntity]?: OrderDirection;
+export type Order<TSelect> = Partial<{
+  [Key in keyof TSelect]?: OrderDirection;
 }>;
 
 /**
  * Complete query filters including where, select, and order clauses.
  */
-export type QueryFilters<TEntity> = {
-  where?: Where<TEntity>;
-  select?: Select<TEntity>;
-  order?: Order<TEntity>;
+export type QueryFilters<TSelect> = {
+  where?: Where<TSelect>;
+  select?: Select<TSelect>;
+  order?: Order<TSelect>;
 };

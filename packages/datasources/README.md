@@ -141,13 +141,13 @@ await transactor.transact(async (tx) => {
 All datasources implement the `IDatasource` interface:
 
 ```typescript
-interface IDatasource<TEntity extends { id: string | number }, TTransaction = unknown> {
-  store(payload: Omit<TEntity, "id">): Promise<TEntity>;
-  lookup(filters: QueryFilters<TEntity>): Promise<TEntity>;
-  list(filters: QueryFilters<TEntity>): Promise<TEntity[]>;
-  modify(filters: QueryFilters<TEntity>, payload: Partial<TEntity>): Promise<TEntity>;
-  destroy(filters: QueryFilters<TEntity>): Promise<void>;
-  withTransaction(tx: TTransaction): IDatasource<TEntity, TTransaction>;
+interface IDatasource<TSelect, TInsert extends Record<string, unknown>, TTransaction> {
+  store(payload: TInsert): Promise<TSelect>;
+  lookup(filters: QueryFilters<TSelect>): Promise<TSelect>;
+  list(filters: QueryFilters<TSelect>): Promise<TSelect[]>;
+  modify(filters: QueryFilters<TSelect>, payload: Partial<TInsert>): Promise<TSelect>;
+  destroy(filters: QueryFilters<TSelect>): Promise<void>;
+  withTransaction(tx: TTransaction): IDatasource<TSelect, TInsert, TTransaction>;
 }
 ```
 

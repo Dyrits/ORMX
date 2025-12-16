@@ -14,10 +14,10 @@ export type { PrismaFieldOperators, PrismaWhere } from "./where/build-prisma";
 // Re-export builders and types
 export { buildPrismaWhere } from "./where/build-prisma";
 
-export type PrismaFilters<TEntity> = {
-  where?: PrismaWhere<TEntity>;
-  select?: PrismaSelect<TEntity>;
-  orderBy?: PrismaOrderBy<TEntity>;
+export type PrismaFilters<TSelect> = {
+  where?: PrismaWhere<TSelect>;
+  select?: PrismaSelect<TSelect>;
+  orderBy?: PrismaOrderBy<TSelect>;
 };
 
 /**
@@ -32,7 +32,7 @@ export type PrismaFilters<TEntity> = {
  * // { where: { name: { contains: "john" } } }
  * ```
  */
-export function buildPrismaFilters<TEntity>(filters: QueryFilters<TEntity>): PrismaFilters<TEntity> {
+export function buildPrismaFilters<TSelect>(filters: QueryFilters<TSelect>): PrismaFilters<TSelect> {
   return {
     orderBy: buildPrismaOrder(filters.order),
     select: buildPrismaSelect(filters.select),

@@ -4,19 +4,19 @@ import type { Operator, Where } from "../types";
  * Supabase/PostgREST filter builder interface.
  * Compatible with the query builder returned by `supabase.from('table').select()`.
  */
-export type SupabaseFilterBuilder<TEntity> = {
-  eq(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  neq(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  gt(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  gte(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  lt(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  lte(column: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  in(column: string, values: unknown[]): SupabaseFilterBuilder<TEntity>;
-  ilike(column: string, pattern: string): SupabaseFilterBuilder<TEntity>;
-  is(column: string, value: null): SupabaseFilterBuilder<TEntity>;
-  not(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TEntity>;
-  or(filters: string): SupabaseFilterBuilder<TEntity>;
-  filter(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TEntity>;
+export type SupabaseFilterBuilder<TSelect> = {
+  eq(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  neq(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  gt(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  gte(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  lt(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  lte(column: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  in(column: string, values: unknown[]): SupabaseFilterBuilder<TSelect>;
+  ilike(column: string, pattern: string): SupabaseFilterBuilder<TSelect>;
+  is(column: string, value: null): SupabaseFilterBuilder<TSelect>;
+  not(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TSelect>;
+  or(filters: string): SupabaseFilterBuilder<TSelect>;
+  filter(column: string, operator: string, value: unknown): SupabaseFilterBuilder<TSelect>;
 };
 
 const operators: Record<Operator, { method: string; transform?: (value: unknown) => unknown } | null> = {
@@ -35,10 +35,10 @@ const operators: Record<Operator, { method: string; transform?: (value: unknown)
   StartsWith: { method: "ilike", transform: (value) => `${String(value)}%` },
 };
 
-function buildConditionString<TEntity, FieldKey extends keyof TEntity>(
+function buildConditionString<TSelect, FieldKey extends keyof TSelect>(
   field: FieldKey,
   operator: Operator,
-  $value: TEntity[FieldKey] | TEntity[FieldKey][] | null,
+  $value: TSelect[FieldKey] | TSelect[FieldKey][] | null,
 ): string | null {
   if (operator === "IsNull") {
     return `${String(field)}.is.null`;
@@ -73,10 +73,10 @@ function buildConditionString<TEntity, FieldKey extends keyof TEntity>(
   return `${String(field)}.${$operator.method}.${finalValue}`;
 }
 
-function buildWhereStrings<TEntity>(where: Where<TEntity>): string[] {
+function buildWhereStrings<TSelect>(where: Where<TSelect>): string[] {
   const output: string[] = [];
 
-  for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
+  for (const [key, value] of Object.entries(where) as [keyof Where<TSelect>, Where<TSelect>[keyof Where<TSelect>]][]) {
     if (key === "OneOf") {
       continue;
     }
@@ -85,11 +85,11 @@ function buildWhereStrings<TEntity>(where: Where<TEntity>): string[] {
       continue;
     }
 
-    type FieldKey = keyof TEntity;
+    type FieldKey = keyof TSelect;
     const field = key as FieldKey;
-    const condition = value as Partial<Record<Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null>>;
+    const condition = value as Partial<Record<Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null>>;
 
-    for (const [operator, $value] of Object.entries(condition) as [Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null][]) {
+    for (const [operator, $value] of Object.entries(condition) as [Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null][]) {
       const result = buildConditionString(field, operator, $value);
       if (result) {
         output.push(result);
@@ -103,15 +103,15 @@ function buildWhereStrings<TEntity>(where: Where<TEntity>): string[] {
 /**
  * Applies Where filters to a Supabase query builder.
  */
-export function buildSupabaseWhere<TEntity>(query: SupabaseFilterBuilder<TEntity>, where?: Where<TEntity>): SupabaseFilterBuilder<TEntity> {
+export function buildSupabaseWhere<TSelect>(query: SupabaseFilterBuilder<TSelect>, where?: Where<TSelect>): SupabaseFilterBuilder<TSelect> {
   if (!where) {
     return query;
   }
 
-  for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
+  for (const [key, value] of Object.entries(where) as [keyof Where<TSelect>, Where<TSelect>[keyof Where<TSelect>]][]) {
     if (key === "OneOf") {
       if (Array.isArray(value)) {
-        const groups = value as Where<TEntity>[];
+        const groups = value as Where<TSelect>[];
         if (groups.length > 0) {
           const $or = groups
             .map(($where) => {
@@ -139,11 +139,11 @@ export function buildSupabaseWhere<TEntity>(query: SupabaseFilterBuilder<TEntity
       continue;
     }
 
-    type FieldKey = keyof TEntity;
+    type FieldKey = keyof TSelect;
     const field = key as FieldKey;
-    const condition = value as Partial<Record<Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null>>;
+    const condition = value as Partial<Record<Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null>>;
 
-    for (const [operator, $value] of Object.entries(condition) as [Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null][]) {
+    for (const [operator, $value] of Object.entries(condition) as [Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null][]) {
       if (operator === "IsNull") {
         query = query.is(field as string, null);
         continue;

@@ -36,26 +36,26 @@ export type PrismaFieldOperators<Value> = {
 /**
  * Prisma's full `where` type for an entity.
  */
-export type PrismaWhere<TEntity> = { [Key in keyof TEntity]?: PrismaFieldOperators<TEntity[Key]> } & {
-  AND?: PrismaWhere<TEntity>[];
-  OR?: PrismaWhere<TEntity>[];
-  NOT?: PrismaWhere<TEntity>[];
+export type PrismaWhere<TSelect> = { [Key in keyof TSelect]?: PrismaFieldOperators<TSelect[Key]> } & {
+  AND?: PrismaWhere<TSelect>[];
+  OR?: PrismaWhere<TSelect>[];
+  NOT?: PrismaWhere<TSelect>[];
 };
 
 /**
  * Converts a generic Where clause into Prisma-compatible format.
  */
-export function buildPrismaWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<TEntity> {
-  const output = {} as PrismaWhere<TEntity>;
+export function buildPrismaWhere<TSelect>(where?: Where<TSelect>): PrismaWhere<TSelect> {
+  const output = {} as PrismaWhere<TSelect>;
 
   if (!where) {
     return output;
   }
 
-  for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
+  for (const [key, value] of Object.entries(where) as [keyof Where<TSelect>, Where<TSelect>[keyof Where<TSelect>]][]) {
     if (key === "OneOf") {
       if (Array.isArray(value)) {
-        const groups = value as Where<TEntity>[];
+        const groups = value as Where<TSelect>[];
         const or = groups.map(($where) => buildPrismaWhere($where));
 
         if (or.length > 0) {
@@ -69,13 +69,13 @@ export function buildPrismaWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<T
       continue;
     }
 
-    type FieldKey = keyof TEntity;
+    type FieldKey = keyof TSelect;
     const field = key as FieldKey;
-    const condition = value as Partial<Record<Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null>>;
+    const condition = value as Partial<Record<Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null>>;
 
-    const prisma$operators: PrismaFieldOperators<TEntity[FieldKey]> = {};
+    const prisma$operators: PrismaFieldOperators<TSelect[FieldKey]> = {};
 
-    for (const [operator, $value] of Object.entries(condition) as [Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null][]) {
+    for (const [operator, $value] of Object.entries(condition) as [Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null][]) {
       if (operator === "IsNull") {
         prisma$operators.equals = null;
         continue;
@@ -91,11 +91,11 @@ export function buildPrismaWhere<TEntity>(where?: Where<TEntity>): PrismaWhere<T
         continue;
       }
 
-      (prisma$operators as Record<keyof PrismaFieldOperators<TEntity[FieldKey]>, unknown>)[$operator] = $value;
+      (prisma$operators as Record<keyof PrismaFieldOperators<TSelect[FieldKey]>, unknown>)[$operator] = $value;
     }
 
     if (Object.keys(prisma$operators).length > 0) {
-      (output as Record<FieldKey, PrismaFieldOperators<TEntity[FieldKey]>>)[field] = prisma$operators;
+      (output as Record<FieldKey, PrismaFieldOperators<TSelect[FieldKey]>>)[field] = prisma$operators;
     }
   }
 

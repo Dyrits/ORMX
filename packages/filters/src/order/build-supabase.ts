@@ -7,6 +7,6 @@ export type { SupabaseFilterBuilder };
  * Applies Order to a Supabase query builder.
  * @todo Not yet implemented
  */
-export function buildSupabaseOrder<TEntity>(query: SupabaseFilterBuilder<TEntity>, _order?: Order<TEntity>): SupabaseFilterBuilder<TEntity> {
+export function buildSupabaseOrder<TSelect>(query: SupabaseFilterBuilder<TSelect>, _order?: Order<TSelect>): SupabaseFilterBuilder<TSelect> {
   return query;
 }

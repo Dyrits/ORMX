@@ -26,17 +26,17 @@ const operators: Record<Operator, (column: AnyColumn, value?: unknown) => SQL> =
 /**
  * Converts a generic Where clause into Drizzle-compatible SQL.
  */
-export function buildDrizzleWhere<TEntity>(where: Where<TEntity>, getColumn: GetColumn): SQL {
+export function buildDrizzleWhere<TSelect>(where: Where<TSelect>, getColumn: GetColumn): SQL {
   if (!where) {
     return TRUE;
   }
 
   const output: SQL[] = [];
 
-  for (const [key, value] of Object.entries(where) as [keyof Where<TEntity>, Where<TEntity>[keyof Where<TEntity>]][]) {
+  for (const [key, value] of Object.entries(where) as [keyof Where<TSelect>, Where<TSelect>[keyof Where<TSelect>]][]) {
     if (key === "OneOf") {
       if (Array.isArray(value)) {
-        const groups = value as Where<TEntity>[];
+        const groups = value as Where<TSelect>[];
         const $or = groups.map(($where) => buildDrizzleWhere($where, getColumn));
         if ($or.length > 0) {
           output.push(or(...$or) as SQL);
@@ -49,14 +49,14 @@ export function buildDrizzleWhere<TEntity>(where: Where<TEntity>, getColumn: Get
       continue;
     }
 
-    type FieldKey = keyof TEntity;
+    type FieldKey = keyof TSelect;
     const field = key as FieldKey;
     const column = getColumn(field as string);
-    const condition = value as Partial<Record<Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null>>;
+    const condition = value as Partial<Record<Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null>>;
 
     const drizzle$operators: SQL[] = [];
 
-    for (const [operator, $value] of Object.entries(condition) as [Operator, TEntity[FieldKey] | TEntity[FieldKey][] | null][]) {
+    for (const [operator, $value] of Object.entries(condition) as [Operator, TSelect[FieldKey] | TSelect[FieldKey][] | null][]) {
       if (operator === "IsNull") {
         drizzle$operators.push(isNull(column));
         continue;
