@@ -2,7 +2,7 @@
   "author": "",
   "description": "Unified query filtering across Prisma, Drizzle, and Supabase",
   "devDependencies": {
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "typescript": "^5.7.0",
     "vitest": "^4.0.15"
   },
