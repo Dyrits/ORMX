@@ -6,8 +6,8 @@ A monorepo for unified ORM utilities. Write your queries once with a common filt
 
 | Package | Version | Description | Docs |
 |---------|---------|-------------|------|
-| [@ormx/filters](./packages/filters) | 0.4.0 | Unified where, select, order and pagination across Prisma, Drizzle, TypeORM, MikroORM and Supabase | [README](./packages/filters/README.md) |
-| [@ormx/datasources](./packages/datasources) | 0.4.0 | Unified CRUD datasource with transactions for Drizzle, Prisma, TypeORM, MikroORM and Supabase | [README](./packages/datasources/README.md) |
+| [@ormx/filters](./packages/filters) | 0.4.1 | Unified where, select, order and pagination across Prisma, Drizzle, TypeORM, MikroORM and Supabase | [README](./packages/filters/README.md) |
+| [@ormx/datasources](./packages/datasources) | 0.4.1 | Unified CRUD datasource with transactions for Drizzle, Prisma, TypeORM, MikroORM and Supabase | [README](./packages/datasources/README.md) |
 
 Both packages target PostgreSQL, and both expose a sub-path per ORM so you only load the one you use.
 

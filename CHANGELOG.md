@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Changed
+
+- Development dependencies are updated so that `bun audit` reports no vulnerabilities: `drizzle-orm` 0.45.3, `@supabase/supabase-js` 2.117, `vitest` 5.0.3 on `vite` 8, and root `overrides` for transitive packages pinned by Prisma and Vite (`mysql2`, `deepmerge-ts`, `fast-uri`, `postcss`, `nanoid`, `rollup`, `picomatch`). The published packages' runtime dependencies are unchanged.
+
 ## 0.4.0
 
 ### Added

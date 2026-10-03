@@ -1,7 +1,7 @@
 {
   "author": "",
   "dependencies": {
-    "@ormx/filters": "^0.4.0"
+    "@ormx/filters": "^0.4.1"
   },
   "description": "Unified datasource abstraction for Drizzle, Prisma, TypeORM, MikroORM and Supabase with transaction support",
   "devDependencies": {
@@ -10,14 +10,15 @@
     "@mikro-orm/pglite": "^7.2.3",
     "@mikro-orm/sql": "^7.2.3",
     "@prisma/client": "^7.10.0",
-    "@supabase/supabase-js": "^2.49.4",
-    "drizzle-orm": "^0.45.1",
+    "@supabase/supabase-js": "^2.117.2",
+    "drizzle-orm": "^0.45.3",
     "pglite-prisma-adapter": "^0.7.2",
     "prisma": "^7.10.0",
     "typeorm": "^1.1.1",
     "typeorm-pglite": "^0.3.4",
     "typescript": "^5.7.0",
-    "vitest": "^5.0.0"
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3"
   },
   "exports": {
     ".": {
@@ -109,5 +110,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.4.0"
+  "version": "0.4.1"
 }
