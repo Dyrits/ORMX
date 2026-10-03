@@ -1,5 +1,5 @@
 import type { EntityMetadata, FindOptionsRelations, FindOptionsSelect } from "typeorm";
-import { isNestedSelect } from "../shared.js";
+import { isNestedSelect, selectedEntries } from "../shared.js";
 import type { Select } from "../types.js";
 
 function assertSupportedRelationFilters(field: string, value: Record<string, unknown>): void {
@@ -16,11 +16,7 @@ export function buildTypeOrmSelect<TEntity>(select?: Select<TEntity>): FindOptio
 
   const output: Record<string, unknown> = {};
 
-  for (const [field, value] of Object.entries(select)) {
-    if (!value) {
-      continue;
-    }
-
+  for (const [field, value] of selectedEntries(select)) {
     if (isNestedSelect(value)) {
       assertSupportedRelationFilters(field, value as Record<string, unknown>);
       output[field] = buildTypeOrmSelect(value.select) ?? true;
@@ -43,11 +39,7 @@ export function buildTypeOrmRelations<TEntity>(select: Select<TEntity> | undefin
 
   const output: Record<string, unknown> = {};
 
-  for (const [field, value] of Object.entries(select)) {
-    if (!value) {
-      continue;
-    }
-
+  for (const [field, value] of selectedEntries(select)) {
     const relation = metadata.findRelationWithPropertyPath(field);
     if (!relation) {
       continue;

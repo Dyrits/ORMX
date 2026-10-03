@@ -1,41 +1,34 @@
 import { type AnyColumn, and, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, type SQL } from "drizzle-orm";
-import { escapeLike, isBlank, isEnabled, operatorEntries, splitWhere } from "../shared.js";
+import { activeOperators, escapeLike, splitWhere } from "../shared.js";
 import type { Operator, Where } from "../types.js";
 import { type ColumnSource, resolveColumn } from "./columns.js";
 
-type Builder = (column: AnyColumn, value: unknown) => SQL | undefined;
+type Builder = (column: AnyColumn, value: unknown) => SQL;
 
-const withValue =
-  (build: (column: AnyColumn, value: unknown) => SQL): Builder =>
-  (column, value) =>
-    isBlank(value) ? undefined : build(column, value);
-
-const withList =
+const list =
   (build: (column: AnyColumn, values: unknown[]) => SQL): Builder =>
   (column, value) =>
-    Array.isArray(value) ? build(column, value) : undefined;
+    build(column, value as unknown[]);
 
-const withFlag =
-  (build: (column: AnyColumn) => SQL): Builder =>
+const pattern =
+  (wrap: (value: string) => string): Builder =>
   (column, value) =>
-    isEnabled(value) ? build(column) : undefined;
-
-const withPattern = (pattern: (value: string) => string): Builder => withValue((column, value) => ilike(column, pattern(escapeLike(String(value)))));
+    ilike(column, wrap(escapeLike(String(value))));
 
 const operators: Record<Operator, Builder> = {
-  Contains: withPattern((value) => `%${value}%`),
-  EndsWith: withPattern((value) => `%${value}`),
-  GT: withValue(gt),
-  GTE: withValue(gte),
-  In: withList(inArray),
-  Is: withValue(eq),
-  IsNot: withValue(ne),
-  IsNotNull: withFlag(isNotNull),
-  IsNull: withFlag(isNull),
-  LT: withValue(lt),
-  LTE: withValue(lte),
-  NotIn: withList(notInArray),
-  StartsWith: withPattern((value) => `${value}%`),
+  Contains: pattern((value) => `%${value}%`),
+  EndsWith: pattern((value) => `%${value}`),
+  GT: gt,
+  GTE: gte,
+  In: list(inArray),
+  Is: eq,
+  IsNot: ne,
+  IsNotNull: isNotNull,
+  IsNull: isNull,
+  LT: lt,
+  LTE: lte,
+  NotIn: list(notInArray),
+  StartsWith: pattern((value) => `${value}%`),
 };
 
 /**
@@ -49,11 +42,8 @@ export function buildDrizzleWhere<TEntity>(where: Where<TEntity> | undefined, co
   for (const [field, condition] of fields) {
     const column = resolveColumn(columns, field);
 
-    for (const [operator, value] of operatorEntries(condition)) {
-      const built = operators[operator](column, value);
-      if (built) {
-        conditions.push(built);
-      }
+    for (const [operator, value] of activeOperators(condition)) {
+      conditions.push(operators[operator](column, value));
     }
   }
 

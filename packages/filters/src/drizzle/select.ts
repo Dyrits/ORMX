@@ -1,4 +1,4 @@
-import { isNestedSelect } from "../shared.js";
+import { isNestedSelect, selectedEntries } from "../shared.js";
 import type { Select } from "../types.js";
 import { type ColumnOf, type ColumnSource, resolveColumn } from "./columns.js";
 
@@ -22,11 +22,7 @@ export function buildDrizzleSelect<TEntity, TSource extends ColumnSource = Colum
 
   const output: DrizzleSelect<TSource> = {};
 
-  for (const [field, value] of Object.entries(select)) {
-    if (!value) {
-      continue;
-    }
-
+  for (const [field, value] of selectedEntries(select)) {
     if (isNestedSelect(value)) {
       throw new Error(`[@ormx/filters] Nested selection on "${field}" is not supported by the Drizzle query builder.`);
     }

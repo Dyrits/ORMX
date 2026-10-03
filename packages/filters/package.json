@@ -1,7 +1,8 @@
 {
   "author": "",
-  "description": "Unified query filtering across Prisma, Drizzle, TypeORM, and Supabase",
+  "description": "Unified query filtering across Prisma, Drizzle, TypeORM, MikroORM, and Supabase",
   "devDependencies": {
+    "@mikro-orm/core": "^7.2.3",
     "@supabase/supabase-js": "^2.49.4",
     "drizzle-orm": "^0.45.1",
     "typeorm": "^1.1.1",
@@ -16,6 +17,10 @@
     "./drizzle": {
       "import": "./dist/drizzle/index.js",
       "types": "./dist/drizzle/index.d.ts"
+    },
+    "./mikro-orm": {
+      "import": "./dist/mikro-orm/index.js",
+      "types": "./dist/mikro-orm/index.d.ts"
     },
     "./prisma": {
       "import": "./dist/prisma/index.js",
@@ -42,6 +47,7 @@
     "drizzle",
     "supabase",
     "typeorm",
+    "mikro-orm",
     "orm",
     "database"
   ],
@@ -50,10 +56,14 @@
   "module": "./dist/index.js",
   "name": "@ormx/filters",
   "peerDependencies": {
+    "@mikro-orm/core": ">=7.0.0",
     "drizzle-orm": ">=0.30.0",
     "typeorm": ">=1.0.0"
   },
   "peerDependenciesMeta": {
+    "@mikro-orm/core": {
+      "optional": true
+    },
     "drizzle-orm": {
       "optional": true
     },
@@ -78,5 +88,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.3.0"
+  "version": "0.4.0"
 }

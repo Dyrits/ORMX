@@ -1,6 +1,6 @@
 # @ormx/datasources
 
-Unified datasource abstraction for Drizzle, Prisma, TypeORM and Supabase with transaction support.
+Unified datasource abstraction for Drizzle, Prisma, TypeORM, MikroORM and Supabase with transaction support.
 
 Provides a common CRUD interface over a table or model, driven by [`@ormx/filters`](../filters/README.md) query filters. Swap the ORM without touching the code that uses the datasource.
 
@@ -12,12 +12,13 @@ npm install @ormx/datasources @ormx/filters
 bun add @ormx/datasources @ormx/filters
 ```
 
-Then install the client you use: `drizzle-orm`, `@prisma/client` (6.2 or later), TypeORM 1.0 or later, or `@supabase/supabase-js`.
+Then install the client you use: `drizzle-orm`, `@prisma/client` (6.2 or later), TypeORM 1.0 or later, a MikroORM 7.0 or later SQL driver such as `@mikro-orm/postgresql`, or `@supabase/supabase-js`.
 
-Import from a sub-path so you only load the target you use. The root export pulls in all three, so it requires every optional peer to be installed:
+Import from a sub-path so you only load the target you use. The root export pulls in every target, so it requires every optional peer to be installed:
 
 ```typescript
 import { DrizzleDatasource, DrizzleTransactor } from "@ormx/datasources/drizzle";
+import { MikroOrmDatasource, MikroOrmTransactor } from "@ormx/datasources/mikro-orm";
 import { PrismaDatasource, PrismaTransactor } from "@ormx/datasources/prisma";
 import { SupabaseDatasource } from "@ormx/datasources/supabase";
 import { TypeOrmDatasource, TypeOrmTransactor } from "@ormx/datasources/typeorm";
@@ -68,6 +69,7 @@ Row types are inferred from the table. Any PostgreSQL driver works (`postgres-js
 
 ```typescript
 import { DrizzleDatasource, DrizzleTransactor } from "@ormx/datasources/drizzle";
+import { MikroOrmDatasource, MikroOrmTransactor } from "@ormx/datasources/mikro-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { users, orders } from "./schema";
 
@@ -153,6 +155,31 @@ await transactor.transact(async (manager) => {
 
 Selected relations are resolved through TypeORM entity metadata, including nested projections. Relation-scoped filtering, ordering and pagination throw because TypeORM's find options cannot express them without changing the parent query's meaning.
 
+## MikroORM
+
+Entity types are inferred from a class or `EntitySchema`. The datasource takes a SQL entity manager, from MikroORM 7.0 or later, and uses PostgreSQL `RETURNING` so that `modify` returns every updated row.
+
+```typescript
+import { MikroOrmDatasource, MikroOrmTransactor } from "@ormx/datasources/mikro-orm";
+
+const usersDatasource = new MikroOrmDatasource(orm.em, User);
+const ordersDatasource = new MikroOrmDatasource(orm.em, Order);
+
+const user = await usersDatasource.store({ name: "John", email: "john@example.com" });
+const active = await usersDatasource.list({ where: { status: { Is: "active" } }, order: { createdAt: "desc" } });
+
+const transactor = new MikroOrmTransactor(orm.em);
+
+await transactor.transact(async (em) => {
+  const user = await usersDatasource.withTransaction(em).store({ name: "John" });
+  await ordersDatasource.withTransaction(em).store({ userId: user.id, total: 100 });
+});
+```
+
+Rows are returned as plain objects rather than managed entities, and the identity map of the entity manager is left untouched, so the global `orm.em` can be passed without `allowGlobalContext`. `store` goes through the unit of work, so `onCreate` and lifecycle hooks run. `modify` and `destroy` run as single native queries, which skip them, `onUpdate` included.
+
+Selected relations are loaded through MikroORM partial loading, and relation-scoped `where` and `order` through `populateWhere` and `populateOrderBy`. MikroORM always returns primary keys, even when they are not selected. Relation-scoped pagination throws.
+
 ## Supabase
 
 ```typescript
@@ -175,17 +202,17 @@ The Supabase JS client has no transactions, so `withTransaction()` throws. For t
 
 `IDatasource` is the same shape everywhere, but two capabilities are not universal:
 
-| Capability                                  | Drizzle | Prisma | TypeORM   | Supabase |
-| ------------------------------------------- | ------- | ------ | --------- | -------- |
-| `withTransaction`                           | yes     | yes    | yes       | throws   |
-| Relation projections in `list`              | throws  | yes    | yes       | yes      |
-| Relation-scoped where/order/limit/offset     | throws  | yes    | throws    | yes      |
+| Capability                                  | Drizzle | Prisma | TypeORM   | MikroORM                          | Supabase |
+| ------------------------------------------- | ------- | ------ | --------- | --------------------------------- | -------- |
+| `withTransaction`                           | yes     | yes    | yes       | yes                               | throws   |
+| Relation projections in `list`              | throws  | yes    | yes       | yes                               | yes      |
+| Relation-scoped where/order/limit/offset    | throws  | yes    | throws    | where on top-level relations, order; pagination throws | yes      |
 
 A function typed against `IDatasource` alone cannot see these, so keep the concrete type where you rely on transactions or nested selections.
 
 ## Testing
 
-The Drizzle, Prisma and TypeORM datasources are tested against PostgreSQL through [PGlite](https://pglite.dev), including commit and rollback. All three run the same shared contract suite, so the implementations cannot drift. The Prisma client used by the tests is generated from `test/prisma/schema.prisma` by `bun run generate`, which the `test` and `typecheck` scripts run for you.
+The Drizzle, Prisma, TypeORM and MikroORM datasources are tested against PostgreSQL through [PGlite](https://pglite.dev), including commit and rollback. All four run the same shared contract suite, so the implementations cannot drift. The Prisma client used by the tests is generated from `test/prisma/schema.prisma` by `bun run generate`, which the `test` and `typecheck` scripts run for you.
 
 ## License
 

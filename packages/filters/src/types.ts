@@ -8,10 +8,13 @@ export type Operator = "Is" | "IsNot" | "GT" | "GTE" | "LT" | "LTE" | "In" | "No
  */
 export type Scalar = string | number | bigint | boolean | Date;
 
+type Item<TValue> = TValue extends Scalar | ArrayBufferView ? TValue : TValue extends Iterable<infer TItem> ? NonNullable<TItem> : TValue;
+
 /**
- * Removes `null`, `undefined` and array wrappers from a type, so that relation fields resolve to the related entity type.
+ * Removes `null`, `undefined` and collection wrappers from a type, so that relation fields resolve to the related entity type.
+ * Collections are arrays and other iterables, such as MikroORM's `Collection`. Strings and binary buffers are kept as they are.
  */
-export type Unwrap<TValue> = NonNullable<TValue> extends (infer TItem)[] ? NonNullable<TItem> : NonNullable<TValue>;
+export type Unwrap<TValue> = Item<NonNullable<TValue>>;
 
 /**
  * Keys of an entity that hold scalar values, or arrays of scalars. Relations are excluded, since they cannot be filtered or sorted on directly.

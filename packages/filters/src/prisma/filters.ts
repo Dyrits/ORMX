@@ -1,4 +1,4 @@
-import { isNestedSelect } from "../shared.js";
+import { isNestedSelect, selectedEntries } from "../shared.js";
 import type { QueryFilters, Scalar, Select, Unwrap } from "../types.js";
 import { buildPrismaOrder, type PrismaOrderBy } from "./order.js";
 import { buildPrismaWhere, type PrismaOptions, type PrismaWhere } from "./where.js";
@@ -32,11 +32,7 @@ export function buildPrismaSelect<TEntity>(select?: Select<TEntity>, options: Pr
 
   const output: Record<string, unknown> = {};
 
-  for (const [field, value] of Object.entries(select)) {
-    if (!value) {
-      continue;
-    }
-
+  for (const [field, value] of selectedEntries(select)) {
     if (isNestedSelect(value)) {
       const nested = buildPrismaFilters(value, options);
       output[field] = Object.keys(nested).length > 0 ? nested : true;

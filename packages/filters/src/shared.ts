@@ -37,11 +37,31 @@ export function splitWhere<TEntity>(where: Where<TEntity> | undefined): { fields
   return { fields, groups: OneOf ?? [] };
 }
 
+const listOperators = new Set<Operator>(["In", "NotIn"]);
+const flagOperators = new Set<Operator>(["IsNull", "IsNotNull"]);
+
 /**
- * Lists the operators of a field condition with their values.
+ * Whether an operator applies with the given value.
+ * Blank values, lists that are not arrays and flags set to `false` are skipped, so optional inputs can be passed through as they are.
+ * Flags are enabled by anything but `false` and `undefined`, so JSON payloads using `null` keep working.
+ */
+function isActive(operator: Operator, value: unknown): boolean {
+  if (flagOperators.has(operator)) {
+    return value !== false && value !== undefined;
+  }
+
+  if (listOperators.has(operator)) {
+    return Array.isArray(value);
+  }
+
+  return value !== undefined && value !== null;
+}
+
+/**
+ * Lists the operators of a field condition that apply, with their values.
  * Throws on unknown operators, so a typo or a bad payload cannot silently drop a condition.
  */
-export function operatorEntries(condition: FieldOperators<unknown>): [Operator, unknown][] {
+export function activeOperators(condition: FieldOperators<unknown>): [Operator, unknown][] {
   const entries = Object.entries(condition);
 
   for (const [operator] of entries) {
@@ -50,21 +70,26 @@ export function operatorEntries(condition: FieldOperators<unknown>): [Operator, 
     }
   }
 
-  return entries as [Operator, unknown][];
+  return (entries as [Operator, unknown][]).filter(([operator, value]) => isActive(operator, value));
 }
 
 /**
- * Whether a filter value should be ignored.
+ * Lists the entries of a select or order clause that are switched on, skipping `false` and `undefined` values.
+ * `TValue` names what the clause holds once those are skipped, such as `OrderDirection` for an order clause.
  */
-export function isBlank(value: unknown): value is null | undefined {
-  return value === undefined || value === null;
+export function enabledEntries<TValue>(clause: object | undefined): [field: string, value: TValue][] {
+  if (!clause) {
+    return [];
+  }
+
+  return Object.entries(clause).filter((entry): entry is [string, TValue] => Boolean(entry[1]));
 }
 
 /**
- * Whether a flag operator such as `IsNull` is enabled. Anything but `false` and `undefined` enables it, so JSON payloads using `null` keep working.
+ * Lists the entries of a select clause that are switched on: `true` for a field, or nested query filters for a relation.
  */
-export function isEnabled(value: unknown): boolean {
-  return value !== false && value !== undefined;
+export function selectedEntries(select: object | undefined): [field: string, value: true | QueryFilters<unknown>][] {
+  return enabledEntries<true | QueryFilters<unknown>>(select);
 }
 
 /**

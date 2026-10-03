@@ -1,4 +1,4 @@
-import { escapeLike, isBlank, isEnabled, operatorEntries, splitWhere } from "../shared.js";
+import { activeOperators, escapeLike, splitWhere } from "../shared.js";
 import type { FieldOperators, Operator, ScalarKeys, Where } from "../types.js";
 
 /**
@@ -41,42 +41,35 @@ export type PrismaOptions = {
 };
 
 type Fragment = Partial<PrismaFieldOperators<unknown>>;
-type Builder = (value: unknown) => Fragment | undefined;
+type Builder = (value: unknown) => Fragment;
 
 const comparison =
   (key: keyof Fragment): Builder =>
-  (value) =>
-    isBlank(value) ? undefined : { [key]: value };
-
-const list =
-  (key: keyof Fragment): Builder =>
-  (value) =>
-    Array.isArray(value) ? { [key]: value } : undefined;
+  (value) => ({ [key]: value });
 
 const flag =
   (fragment: Fragment): Builder =>
-  (value) =>
-    isEnabled(value) ? fragment : undefined;
+  () =>
+    fragment;
 
-const text =
+const pattern =
   (key: keyof Fragment): Builder =>
-  (value) =>
-    isBlank(value) ? undefined : { [key]: escapeLike(String(value)) };
+  (value) => ({ [key]: escapeLike(String(value)) });
 
 const operators: Record<Operator, Builder> = {
-  Contains: text("contains"),
-  EndsWith: text("endsWith"),
+  Contains: pattern("contains"),
+  EndsWith: pattern("endsWith"),
   GT: comparison("gt"),
   GTE: comparison("gte"),
-  In: list("in"),
+  In: comparison("in"),
   Is: comparison("equals"),
   IsNot: comparison("not"),
   IsNotNull: flag({ not: null }),
   IsNull: flag({ equals: null }),
   LT: comparison("lt"),
   LTE: comparison("lte"),
-  NotIn: list("notIn"),
-  StartsWith: text("startsWith"),
+  NotIn: comparison("notIn"),
+  StartsWith: pattern("startsWith"),
 };
 
 const textOperators = new Set<Operator>(["Contains", "StartsWith", "EndsWith"]);
@@ -84,11 +77,8 @@ const textOperators = new Set<Operator>(["Contains", "StartsWith", "EndsWith"]);
 function buildField(condition: FieldOperators<unknown>, options: PrismaOptions): { scalar: Fragment; text: Fragment } {
   const output = { scalar: {} as Fragment, text: {} as Fragment };
 
-  for (const [operator, value] of operatorEntries(condition)) {
-    const fragment = operators[operator](value);
-    if (fragment) {
-      Object.assign(textOperators.has(operator) ? output.text : output.scalar, fragment);
-    }
+  for (const [operator, value] of activeOperators(condition)) {
+    Object.assign(textOperators.has(operator) ? output.text : output.scalar, operators[operator](value));
   }
 
   if (Object.keys(output.text).length > 0 && options.caseInsensitive !== false) {

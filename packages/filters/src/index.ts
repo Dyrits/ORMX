@@ -1,4 +1,5 @@
 export * from "./drizzle/index.js";
+export * from "./mikro-orm/index.js";
 export * from "./prisma/index.js";
 export * from "./supabase/index.js";
 export * from "./typeorm/index.js";

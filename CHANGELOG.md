@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+### Added
+
+- MikroORM 7.x filter builders at `@ormx/filters/mikro-orm`, mapping where clauses to filter queries with PostgreSQL `$ilike`, `select` to partial loading `fields`, and relation-scoped `where` and `order` to `populateWhere` and `populateOrderBy`.
+- `MikroOrmDatasource` and `MikroOrmTransactor` at `@ormx/datasources/mikro-orm`, returning plain objects without touching the identity map, with PostgreSQL `RETURNING` and transaction support.
+
+### Changed
+
+- The rule deciding which operators are skipped (blank values, non-array lists, disabled flags) lives in one shared place instead of being repeated in every target. Behaviour is unchanged.
+
 ## 0.3.0
 
 ### Added

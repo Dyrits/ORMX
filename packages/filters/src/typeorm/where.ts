@@ -1,23 +1,19 @@
 import { And, Equal, type FindOperator, type FindOptionsWhere, ILike, In, IsNull, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Not } from "typeorm";
-import { escapeLike, isBlank, isEnabled, operatorEntries, splitWhere } from "../shared.js";
+import { activeOperators, escapeLike, splitWhere } from "../shared.js";
 import type { FieldOperators, Operator, Where } from "../types.js";
 
 type Value = string | number | bigint | boolean | Date;
 type Condition = FindOperator<Value>;
-type Builder = (value: unknown) => Condition | undefined;
+type Builder = (value: unknown) => Condition;
 
 const comparison =
   (build: (value: Value) => Condition): Builder =>
   (value) =>
-    isBlank(value) ? undefined : build(value as Value);
+    build(value as Value);
 const list =
   (build: (values: Value[]) => Condition): Builder =>
   (value) =>
-    Array.isArray(value) ? build(value as Value[]) : undefined;
-const flag =
-  (build: () => Condition): Builder =>
-  (value) =>
-    isEnabled(value) ? build() : undefined;
+    build(value as Value[]);
 const pattern = (wrap: (value: string) => string): Builder => comparison((value) => ILike(wrap(escapeLike(String(value)))) as FindOperator<Value>);
 
 const operators: Record<Operator, Builder> = {
@@ -28,8 +24,8 @@ const operators: Record<Operator, Builder> = {
   In: list((values) => In(values)),
   Is: comparison((value) => Equal(value)),
   IsNot: comparison((value) => Not(Equal(value))),
-  IsNotNull: flag(() => Not(IsNull()) as FindOperator<Value>),
-  IsNull: flag(() => IsNull() as FindOperator<Value>),
+  IsNotNull: () => Not(IsNull()) as FindOperator<Value>,
+  IsNull: () => IsNull() as FindOperator<Value>,
   LT: comparison((value) => LessThan(value)),
   LTE: comparison((value) => LessThanOrEqual(value)),
   NotIn: list((values) => Not(In(values))),
@@ -37,10 +33,7 @@ const operators: Record<Operator, Builder> = {
 };
 
 function buildField(condition: FieldOperators<unknown>): Condition | undefined {
-  const output = operatorEntries(condition).flatMap(([operator, value]) => {
-    const built = operators[operator](value);
-    return built === undefined ? [] : [built];
-  });
+  const output = activeOperators(condition).map(([operator, value]) => operators[operator](value));
 
   if (output.length === 0) {
     return undefined;

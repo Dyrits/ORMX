@@ -1,5 +1,5 @@
 import type { QueryFilters } from "@ormx/filters";
-import { buildDrizzleOrder, buildDrizzleSelect, buildDrizzleWhere } from "@ormx/filters/drizzle";
+import { buildDrizzleFilters, buildDrizzleSelect, buildDrizzleWhere } from "@ormx/filters/drizzle";
 import { type AnyColumn, getTableColumns } from "drizzle-orm";
 import type { PgDatabase, PgInsertValue, PgQueryResultHKT, PgTable, PgUpdateSetSource, SelectedFields } from "drizzle-orm/pg-core";
 import type IDatasource from "./datasource.interface.js";
@@ -46,9 +46,7 @@ export default class DrizzleDatasource<TTable extends PgTable, TSelect = TTable[
   }
 
   async list(filters: QueryFilters<TSelect> = {}): Promise<TSelect[]> {
-    const where = buildDrizzleWhere(filters.where, this.columns);
-    const select = buildDrizzleSelect(filters.select, this.columns);
-    const orderBy = buildDrizzleOrder(filters.order, this.columns);
+    const { where, select, orderBy, limit, offset } = buildDrizzleFilters(filters, this.columns);
 
     let query = (select ? this.database.select(select as SelectedFields) : this.database.select()).from(this.table as PgTable).$dynamic();
 
@@ -58,11 +56,11 @@ export default class DrizzleDatasource<TTable extends PgTable, TSelect = TTable[
     if (orderBy.length > 0) {
       query = query.orderBy(...orderBy);
     }
-    if (filters.limit !== undefined) {
-      query = query.limit(filters.limit);
+    if (limit !== undefined) {
+      query = query.limit(limit);
     }
-    if (filters.offset !== undefined) {
-      query = query.offset(filters.offset);
+    if (offset !== undefined) {
+      query = query.offset(offset);
     }
 
     return (await query) as TSelect[];

@@ -1,5 +1,6 @@
 import { asc, desc, type SQL } from "drizzle-orm";
-import type { Order } from "../types.js";
+import { enabledEntries } from "../shared.js";
+import type { Order, OrderDirection } from "../types.js";
 import { type ColumnSource, resolveColumn } from "./columns.js";
 
 /**
@@ -11,17 +12,9 @@ import { type ColumnSource, resolveColumn } from "./columns.js";
  * ```
  */
 export function buildDrizzleOrder<TEntity>(order: Order<TEntity> | undefined, columns: ColumnSource): SQL[] {
-  if (!order) {
-    return [];
-  }
-
-  return Object.entries(order).flatMap(([field, direction]) => {
-    if (!direction) {
-      return [];
-    }
-
+  return enabledEntries<OrderDirection>(order).map(([field, direction]) => {
     const column = resolveColumn(columns, field);
 
-    return [direction === "desc" ? desc(column) : asc(column)];
+    return direction === "desc" ? desc(column) : asc(column);
   });
 }

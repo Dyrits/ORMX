@@ -1,4 +1,4 @@
-import { escapeLike, isBlank, isEnabled, operatorEntries, splitWhere } from "../shared.js";
+import { activeOperators, escapeLike, splitWhere } from "../shared.js";
 import type { Operator, Where } from "../types.js";
 import { formatList, formatValue, qualify, quoteValue, reference, type SupabaseQuery } from "./query.js";
 
@@ -6,27 +6,23 @@ import { formatList, formatValue, qualify, quoteValue, reference, type SupabaseQ
  * A PostgREST filter: `operator.value`, where `value` is `null` for `is` checks and a parenthesised list for `in` checks.
  */
 type Operation = { operator: string; value: string | null; list?: boolean };
-type Builder = (value: unknown) => Operation | undefined;
+type Builder = (value: unknown) => Operation;
 
 const comparison =
   (operator: string): Builder =>
-  (value) =>
-    isBlank(value) ? undefined : { operator, value: formatValue(value) };
+  (value) => ({ operator, value: formatValue(value) });
 
 const pattern =
   (wrap: (value: string) => string): Builder =>
-  (value) =>
-    isBlank(value) ? undefined : { operator: "ilike", value: wrap(escapeLike(formatValue(value))) };
+  (value) => ({ operator: "ilike", value: wrap(escapeLike(formatValue(value))) });
 
 const list =
   (operator: string): Builder =>
-  (value) =>
-    Array.isArray(value) ? { list: true, operator, value: formatList(value) } : undefined;
+  (value) => ({ list: true, operator, value: formatList(value as unknown[]) });
 
 const flag =
   (operator: string): Builder =>
-  (value) =>
-    isEnabled(value) ? { operator, value: null } : undefined;
+  () => ({ operator, value: null });
 
 const operators: Record<Operator, Builder> = {
   Contains: pattern((value) => `%${value}%`),
@@ -49,23 +45,20 @@ function toOperations<TEntity>(where: Where<TEntity> | undefined): { operations:
   const operations: [string, Operation][] = [];
 
   for (const [field, condition] of fields) {
-    for (const [operator, value] of operatorEntries(condition)) {
-      const operation = operators[operator](value);
-      if (operation) {
-        operations.push([field, operation]);
-      }
+    for (const [operator, value] of activeOperators(condition)) {
+      operations.push([field, operators[operator](value)]);
     }
   }
 
   return { groups, operations };
 }
 
-function render(field: string, { list, operator, value }: Operation): string {
+function render(field: string, { list: isList, operator, value }: Operation): string {
   if (value === null) {
     return `${field}.${operator}.null`;
   }
 
-  return `${field}.${operator}.${list ? value : quoteValue(value)}`;
+  return `${field}.${operator}.${isList ? value : quoteValue(value)}`;
 }
 
 function renderGroups<TEntity>(groups: Where<TEntity>[]): string[] {

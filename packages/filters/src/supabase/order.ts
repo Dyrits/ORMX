@@ -1,4 +1,5 @@
-import type { Order } from "../types.js";
+import { enabledEntries } from "../shared.js";
+import type { Order, OrderDirection } from "../types.js";
 import { reference, type SupabaseQuery } from "./query.js";
 
 /**
@@ -6,17 +7,9 @@ import { reference, type SupabaseQuery } from "./query.js";
  * Pass `path` to sort rows of an embedded resource instead of the top-level table.
  */
 export function buildSupabaseOrder<TQuery extends SupabaseQuery, TEntity>(query: TQuery, order?: Order<TEntity>, path?: string): TQuery {
-  if (!order) {
-    return query;
-  }
-
   let output: SupabaseQuery = query;
 
-  for (const [field, direction] of Object.entries(order)) {
-    if (!direction) {
-      continue;
-    }
-
+  for (const [field, direction] of enabledEntries<OrderDirection>(order)) {
     output = output.order(field, { ascending: direction === "asc", ...reference(path) });
   }
 

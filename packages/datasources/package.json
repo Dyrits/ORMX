@@ -1,11 +1,14 @@
 {
   "author": "",
   "dependencies": {
-    "@ormx/filters": "^0.3.0"
+    "@ormx/filters": "^0.4.0"
   },
-  "description": "Unified datasource abstraction for Drizzle, Prisma, TypeORM and Supabase with transaction support",
+  "description": "Unified datasource abstraction for Drizzle, Prisma, TypeORM, MikroORM and Supabase with transaction support",
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "@mikro-orm/core": "^7.2.3",
+    "@mikro-orm/pglite": "^7.2.3",
+    "@mikro-orm/sql": "^7.2.3",
     "@prisma/client": "^7.10.0",
     "@supabase/supabase-js": "^2.49.4",
     "drizzle-orm": "^0.45.1",
@@ -24,6 +27,10 @@
     "./drizzle": {
       "import": "./dist/drizzle.js",
       "types": "./dist/drizzle.d.ts"
+    },
+    "./mikro-orm": {
+      "import": "./dist/mikro-orm.js",
+      "types": "./dist/mikro-orm.d.ts"
     },
     "./prisma": {
       "import": "./dist/prisma.js",
@@ -50,6 +57,7 @@
     "prisma",
     "supabase",
     "typeorm",
+    "mikro-orm",
     "database",
     "orm"
   ],
@@ -58,11 +66,19 @@
   "module": "./dist/index.js",
   "name": "@ormx/datasources",
   "peerDependencies": {
+    "@mikro-orm/core": ">=7.0.0",
+    "@mikro-orm/sql": ">=7.0.0",
     "@prisma/client": ">=6.2.0",
     "drizzle-orm": ">=0.30.0",
     "typeorm": ">=1.0.0"
   },
   "peerDependenciesMeta": {
+    "@mikro-orm/core": {
+      "optional": true
+    },
+    "@mikro-orm/sql": {
+      "optional": true
+    },
     "@prisma/client": {
       "optional": true
     },
@@ -93,5 +109,5 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "0.3.0"
+  "version": "0.4.0"
 }

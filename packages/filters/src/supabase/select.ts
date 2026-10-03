@@ -1,4 +1,4 @@
-import { isNestedSelect } from "../shared.js";
+import { isNestedSelect, selectedEntries } from "../shared.js";
 import type { QueryFilters, Select } from "../types.js";
 
 /**
@@ -18,11 +18,7 @@ export function buildSupabaseSelect<TEntity>(select?: Select<TEntity>): string |
 
   const columns: string[] = [];
 
-  for (const [field, value] of Object.entries(select)) {
-    if (!value) {
-      continue;
-    }
-
+  for (const [field, value] of selectedEntries(select)) {
     if (isNestedSelect(value)) {
       columns.push(`${field}(${buildSupabaseSelect(value.select) ?? "*"})`);
       continue;
