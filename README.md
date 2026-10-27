@@ -2,7 +2,7 @@
 
 A monorepo for unified ORM utilities. Write your queries once with a common filter format, then run them on Prisma, Drizzle, TypeORM, MikroORM or Supabase.
 
-## Packages
+## About The Project
 
 | Package | Version | Description | Docs |
 |---------|---------|-------------|------|
@@ -29,4 +29,8 @@ Publish with `bun publish` from each package directory, or with npm. The version
 
 ## License
 
-MIT
+MIT, as declared in each package's `package.json`. No LICENSE file is present.
+
+## Contact
+
+Dyrits - https://github.com/Dyrits
